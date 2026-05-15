@@ -504,7 +504,11 @@
     let currentChannel = 'news';
     let currentItemIndex = {};
     let isFullscreen = false;
-
+    
+    let tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+document.body.appendChild(tag);
+    
     Object.keys(MNTV_CHANNELS).forEach(ch => {
       currentItemIndex[ch] = 0;
     });
@@ -662,11 +666,31 @@
           video.play().catch(e => console.log('Autoplay failed'));
         });
       }
-      else if (item.type === 'youtube') {
-        const iframe = document.getElementById(`iframe-${channelKey}`);
-        iframe.src = `https://www.youtube.com/embed/${item.file}?autoplay=1&controls=0&modestbranding=1`;
-        iframe.style.display = 'block';
+        
+      else if (ch.type === 'youtube') {
+  wrapper.innerHTML = `<div id="yt-${chKey}" style="width:100%;height:100%;"></div>`;
+  
+  players[chKey] = new YT.Player(`yt-${chKey}`, {
+    videoId: ch.file,
+    playerVars: {
+      autoplay: 1,
+      mute: 1,
+      controls: 0,
+      modestbranding: 1,
+      rel: 0,
+      playsinline: 1
+    },
+    events: {
+      'onReady': () => setOnAir(),
+      'onStateChange': (e) => {
+        if (e.data === YT.PlayerState.ENDED) {
+          nextTrack(chKey); // play next item in playlist array
+        }
       }
+    }
+  });
+      }
+
       else if (item.type === 'audio') {
         const audio = document.getElementById(`audio-${channelKey}`);
         if (!audio.src || !audio.src.includes(item.file)) {
