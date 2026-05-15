@@ -127,6 +127,49 @@
       z-index: 9999;
     }
 
+.fullscreen-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.3);
+      display: none;
+      z-index: 9998;
+      backdrop-filter: blur(2px);
+    }
+
+.fullscreen-overlay.active {
+      display: block;
+    }
+
+.fullscreen-exit-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(11, 61, 128, 0.9);
+      color: white;
+      border: 2px solid var(--mntv-gold);
+      padding: 12px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      display: none;
+      z-index: 10000;
+      transition: 0.2s;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+.fullscreen-exit-btn.active {
+      display: block;
+    }
+
+.fullscreen-exit-btn:hover {
+      background: rgba(11, 61, 128, 1);
+      transform: scale(1.05);
+}
+
 .channel-video,.channel-audio,.channel-image,.channel-iframe {
       position: absolute;
       top: 0;
@@ -313,6 +356,15 @@
 .watch-container { flex-direction: column; }
 .playlist-section { width: 100%; }
     }
+
+    @media (max-width: 640px) {
+      .fullscreen-exit-btn {
+        top: 10px;
+        right: 10px;
+        padding: 10px 16px;
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -335,6 +387,9 @@
     <button class="ch-btn" onclick="switchChannel('radio')">CH5: Radyo Maharlika</button>
     <button class='ch-btn' onclick="switchChannel('government')">CH6: State Republic of Maharlika State Network</button>
   </div>
+
+  <div id="fullscreenOverlay" class="fullscreen-overlay"></div>
+  <button id="fullscreenExitBtn" class="fullscreen-exit-btn" onclick="toggleFullscreen()">✕ Exit Fullscreen</button>
 
   <div class="watch-container">
     <div class="player-section">
@@ -368,13 +423,13 @@
       </div>
 
       <div class="player-controls">
-        <button class="control-btn" id="playBtn" onclick="togglePlay()" title="Play/Pause">
+        <button class="control-btn" id="playBtn" onclick="togglePlay()" title="Play/Pause (Space)">
           <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         </button>
-        <button class="control-btn" id="muteBtn" onclick="toggleMute()" title="Mute/Unmute">
+        <button class="control-btn" id="muteBtn" onclick="toggleMute()" title="Mute/Unmute (M)">
           <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23z"/></svg>
         </button>
-        <button class="control-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="Fullscreen">
+        <button class="control-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="Fullscreen (F)">
           <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
         </button>
       </div>
@@ -535,14 +590,20 @@
 
     function toggleFullscreen() {
       const player = document.getElementById('tvPlayer');
+      const overlay = document.getElementById('fullscreenOverlay');
+      const exitBtn = document.getElementById('fullscreenExitBtn');
       isFullscreen = !isFullscreen;
       
       if (isFullscreen) {
         player.classList.add('fullscreen');
+        overlay.classList.add('active');
+        exitBtn.classList.add('active');
         document.body.style.overflow = 'hidden';
         document.getElementById('fullscreenBtn').innerHTML = `<svg viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>`;
       } else {
         player.classList.remove('fullscreen');
+        overlay.classList.remove('active');
+        exitBtn.classList.remove('active');
         document.body.style.overflow = 'auto';
         document.getElementById('fullscreenBtn').innerHTML = `<svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>`;
       }
@@ -714,6 +775,7 @@
       if (e.key === 'f' || e.key === 'F') toggleFullscreen();
       if (e.key === ' ') { e.preventDefault(); togglePlay(); }
       if (e.key === 'm' || e.key === 'M') toggleMute();
+      if (e.key === 'Escape') { if (isFullscreen) toggleFullscreen(); }
     });
     
     function updateClock() {
