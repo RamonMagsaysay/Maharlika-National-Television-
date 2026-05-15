@@ -21,11 +21,29 @@
     }
     
     body {
-      background: #5C0011;
+      background: #272727;
       color: white;
       font-family: 'Segoe UI', Arial, sans-serif;
       min-height: 100vh;
     }
+
+    body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(10, 168, 224, 0.2) 0%, transparent 70%);
+    animation: bgPulse 10s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes bgPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
     
     .tv-header {
       background: #0B3D80;
