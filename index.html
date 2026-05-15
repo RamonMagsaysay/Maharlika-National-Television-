@@ -113,6 +113,14 @@
       overflow: hidden;
     }
 
+.tv-player iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+    }
+
 .tv-player.fullscreen {
       position: fixed;
       top: 0;
@@ -684,31 +692,34 @@ function toggleFullscreen() {
 }
 
 function switchChannel(channelKey) {
-  hideAllMedia();
   currentChannel = channelKey;
+
   const ch = MNTV_CHANNELS[channelKey];
 
-  if (!ch ||!ch.items || ch.items.length === 0) {
-    console.log('Channel has no items:', channelKey);
-    document.getElementById('playlist').innerHTML = '<div style="padding:20px;text-align:center;color:#888;">No items in this channel</div>';
-    return;
-  }
-
-  // Fix broken index
-  if (currentItemIndex[channelKey] === undefined || currentItemIndex[channelKey] >= ch.items.length) {
+  // reset invalid indexes
+  if (
+    currentItemIndex[channelKey] >= ch.items.length ||
+    currentItemIndex[channelKey] == null
+  ) {
     currentItemIndex[channelKey] = 0;
   }
 
   document.querySelectorAll('.ch-btn').forEach((btn, i) => {
-    btn.classList.toggle('active', Object.keys(MNTV_CHANNELS)[i] === channelKey);
+    btn.classList.toggle(
+      'active',
+      Object.keys(MNTV_CHANNELS)[i] === channelKey
+    );
   });
 
   document.getElementById('channelBadge').textContent = ch.name;
 
   const item = ch.items[currentItemIndex[channelKey]];
+
   playMedia(channelKey, item);
+
   renderPlaylist();
-}
+    }
+  
 
 function playMedia(channelKey, item) {
   const ch = MNTV_CHANNELS[channelKey];
@@ -756,49 +767,137 @@ function playMedia(channelKey, item) {
 
     if (players[channelKey]) {
       players[channelKey].destroy();
+
+      
+function playMedia(channelKey, item) {
+  const ch = MNTV_CHANNELS[channelKey];
+  const screen = document.getElementById('channelContent');
+
+  // Clear overlays / embeds
+  screen.innerHTML = '';
+
+  // Hide ALL media first
+  document.querySelectorAll(
+    '.channel-video,.channel-audio,.channel-image,.radio-ui'
+  ).forEach(el => {
+    el.style.display = 'none';
+
+    if (el.tagName === 'VIDEO' || el.tagName === 'AUDIO') {
+      el.pause();
+      el.currentTime = 0;
     }
+  });
 
-    players[channelKey] = new YT.Player(`yt-${channelKey}`, {
-      videoId: item.file,
-      playerVars: {
-        autoplay: 1,
-        mute: 1,
-        controls: 0,
-        modestbranding: 1,
-        rel: 0,
-        playsinline: 1,
-        origin: location.origin
-      },
-      events: {
-        'onReady': (e) => e.target.playVideo(),
-        'onStateChange': (e) => {
-          if (e.data === YT.PlayerState.ENDED) {
-            nextItem(channelKey);
-          }
-        },
-        'onError': (e) => {
-          console.log('YouTube error:', e.data);
-          nextItem(channelKey);
-        }
-      }
-    });
+  document.getElementById('videoTitle').textContent =
+    item.title || 'No Signal';
 
-  } else if (item.type === 'audio') {
-    screen.innerHTML = `<audio id="audio-${channelKey}" class="channel-audio"></audio>`;
-    const audio = document.getElementById(`audio-${channelKey}`);
-    audio.src = item.file;
-    audio.muted = false;
-    setupEndedListeners(audio, channelKey);
-    audio.play().catch(() => {
-      audio.muted = true;
-      audio.play();
-    });
+  document.getElementById('videoMeta').textContent = ch.name;
 
-  } else if (item.type === 'image') {
-    screen.innerHTML = `<img id="image-${channelKey}" class="channel-image" src="${item.file}" style="width:100%;height:100%;object-fit:contain;display:block;">`;
+  // STATUS BADGE
+  const badgeEl = document.getElementById('statusBadge');
+
+  if (item.isLive) {
+    badgeEl.className = 'live-badge';
+    badgeEl.textContent = '● LIVE';
+  }
+  else if (item.file) {
+    badgeEl.className = 'vod-badge';
+    badgeEl.textContent = 'ON DEMAND';
+  }
+  else {
+    badgeEl.className = '';
+    badgeEl.innerHTML = '';
   }
 
-  updatePlayButton();
+  // NO SIGNAL
+  if (!item || !item.file || item.type === null) {
+    screen.innerHTML = `
+      <div class="no-signal">
+        <div>NO SIGNAL</div>
+        <div style="font-size:14px;margin-top:10px;">
+          Please stand by
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // VIDEO
+  if (item.type === 'video') {
+    const video = document.getElementById(`video-${channelKey}`);
+
+    video.style.display = 'block';
+
+    if (!video.src || !video.src.includes(item.file)) {
+      video.src = item.file;
+      video.load();
+      setupEndedListeners(video, channelKey);
+    }
+
+    video.muted = false;
+
+    video.play().catch(() => {
+      video.muted = true;
+      video.play().catch(() => {});
+    });
+  }
+
+  // AUDIO
+  else if (item.type === 'audio') {
+    const audio = document.getElementById(`audio-${channelKey}`);
+
+    if (!audio.src || !audio.src.includes(item.file)) {
+      audio.src = item.file;
+      audio.load();
+      setupEndedListeners(audio, channelKey);
+    }
+
+    audio.muted = false;
+
+    if (ch.isRadio) {
+      const radioUI = document.getElementById(`radio-ui-${channelKey}`);
+
+      radioUI.style.display = 'flex';
+
+      document.getElementById('radio-title').textContent =
+        item.title;
+    }
+
+    audio.play().catch(() => {
+      audio.muted = true;
+      audio.play().catch(() => {});
+    });
+  }
+
+  // IMAGE
+  else if (item.type === 'image') {
+    const img = document.getElementById(`image-${channelKey}`);
+
+    img.src = item.file;
+    img.style.display = 'block';
+  }
+
+  // YOUTUBE
+  else if (item.type === 'youtube') {
+    screen.innerHTML = `
+      <iframe
+        width="100%"
+        height="100%"
+        src="https://www.youtube.com/embed/${item.file}?autoplay=1&mute=0&rel=0"
+        title="${item.title}"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen
+        style="
+          position:absolute;
+          top:0;
+          left:0;
+          width:100%;
+          height:100%;
+        ">
+      </iframe>
+    `;
+  }
 }
 
 function setupEndedListeners(mediaEl, channelKey) {
