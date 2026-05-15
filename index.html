@@ -377,8 +377,7 @@
     <div id="liveClock">00:00:00 PHT</div>
   </header>
   <div class="ticker">
-    <span>TEST BROADCAST•UNDER DEVELOPMENT BY THE PRESIDENTIAL INFORMATION OFFICE•A GIFT TO THE MAHARLIKAN GOVERNMENT</span>
-  </div>
+    <span>President Russel Cano announced the new Chief Justice of the Supreme Court • Secretary of State Pedrasita, to issue a diplomatic letter to Balzian President Carl Victa • Officials confirmed the recent issue about other citizens inappropriate act on the Maharlikan flag</span>
   <div class="channel-bar">
     <button class="ch-btn active" onclick="switchChannel('news')">CH1: Maharlika News</button>
     <button class="ch-btn" onclick="switchChannel('sports')">CH2: Maharlika State Sports</button>
@@ -450,11 +449,11 @@
     const MNTV_CHANNELS = {
       news: {
         name: 'Maharlika News',
-        type: null,
-        isLive: false,
-        file: null,
+        type: 'youtube'
+        isLive: true,
+        file: 'HAFzcjuBAAo',
         items: [
-          { title: 'No Broadcast', type: null, file: null, isLive: false, thumb: null },
+          { title: 'Auld Lang Syne', type: 'youtube', file: 'HAFzcjuBAAo', isLive: true, thumb: null },
         ]
       },
       sports: {
@@ -488,9 +487,9 @@
       },
       radio: {
         name: 'Radio Maharlika',
-        type: 'audio',
+        type: 'youtube',
         isLive: false,
-        file: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+        file: 'jNQXAC9IVRw',
         isRadio: true,
         items: [
           { title: 'TEST BROADCAST', type: 'youtube', file: 'jNQXAC9IVRw', isLive: false, thumb: null }
