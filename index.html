@@ -686,11 +686,32 @@ function playMedia(channelKey, item) {
       video.play();
     });
 
-  } else if (item.type === 'youtube') {
-    if (!youtubeAPIReady) {
-      screen.innerHTML = `<div class="no-signal"><div>Loading YouTube...</div></div>`;
-      return;
+} else if (item.type === 'youtube') {
+  console.log('1. API ready:', youtubeAPIReady);
+  console.log('2. Video ID:', item.file);
+  console.log('3. Div exists:', !!document.getElementById('channelContent'));
+
+  if (!youtubeAPIReady) {
+    screen.innerHTML = `<div class="no-signal"><div>Loading YouTube API...</div></div>`;
+    return;
+  }
+
+  screen.innerHTML = `<div id="yt-${channelKey}" style="width:100%;height:400px;background:#111;"></div>`;
+
+  if (players[channelKey]) {
+    players[channelKey].destroy();
+  }
+
+  players[channelKey] = new YT.Player(`yt-${channelKey}`, {
+    videoId: item.file,
+    playerVars: { autoplay: 1, mute: 1, playsinline: 1 },
+    events: {
+      'onReady': () => console.log('4. Player ready'),
+      'onError': (e) => console.log('5. Player error:', e.data),
+      'onStateChange': (e) => console.log('6. State:', e.data)
     }
+  });
+  }
 
     screen.innerHTML = `<div id="yt-${channelKey}" class="channel-iframe" style="width:100%;height:100%;"></div>`;
 
