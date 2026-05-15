@@ -116,6 +116,17 @@
       overflow: hidden;
     }
 
+.tv-player.fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      aspect-ratio: unset;
+      border: none;
+      z-index: 9999;
+    }
+
 .channel-video,.channel-audio,.channel-image,.channel-iframe {
       position: absolute;
       top: 0;
@@ -224,7 +235,7 @@
       display: flex;
       gap: 10px;
     }
-.mute-btn {
+.control-btn {
       background: #272727;
       color: white;
       border: none;
@@ -238,8 +249,8 @@
       justify-content: center;
       transition: 0.2s;
     }
-.mute-btn:hover { background: var(--mntv-blue); }
-.mute-btn svg { width: 20px; height: 20px; fill: currentColor; }
+.control-btn:hover { background: var(--mntv-blue); }
+.control-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
 .video-info h2 { margin: 12px 0 5px; font-size: 20px; }
 .video-meta { color: #aaa; font-size: 14px; }
@@ -337,11 +348,11 @@
         <video id="video-kids" class="channel-video"></video>
         <video id="video-government" class="channel-video"></video>
         <audio id="audio-radio" class="channel-audio"></audio>
-        <iframe id="iframe-news" class="channel-iframe"></iframe>
-        <iframe id="iframe-sports" class="channel-iframe"></iframe>
-        <iframe id="iframe-music" class="channel-iframe"></iframe>
-        <iframe id="iframe-kids" class="channel-iframe"></iframe>
-        <iframe id="iframe-government" class="channel-iframe"></iframe>
+        <iframe id="iframe-news" class="channel-iframe" allowfullscreen="true"></iframe>
+        <iframe id="iframe-sports" class="channel-iframe" allowfullscreen="true"></iframe>
+        <iframe id="iframe-music" class="channel-iframe" allowfullscreen="true"></iframe>
+        <iframe id="iframe-kids" class="channel-iframe" allowfullscreen="true"></iframe>
+        <iframe id="iframe-government" class="channel-iframe" allowfullscreen="true"></iframe>
         <div id="radio-ui-radio" class="radio-ui">
           <div class="radio-logo">📻</div>
           <div id="radio-title" style="color:var(--mntv-gold);font-weight:bold;"></div>
@@ -357,8 +368,14 @@
       </div>
 
       <div class="player-controls">
-        <button class="mute-btn" id="muteBtn" onclick="toggleMute()">
+        <button class="control-btn" id="playBtn" onclick="togglePlay()" title="Play/Pause">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="control-btn" id="muteBtn" onclick="toggleMute()" title="Mute/Unmute">
           <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23z"/></svg>
+        </button>
+        <button class="control-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="Fullscreen">
+          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
         </button>
       </div>
 
@@ -437,6 +454,7 @@
 
     let currentChannel = 'news';
     let currentItemIndex = {};
+    let isFullscreen = false;
 
     Object.keys(MNTV_CHANNELS).forEach(ch => {
       currentItemIndex[ch] = 0;
@@ -474,9 +492,36 @@
       });
     }
 
+    function togglePlay() {
+      const ch = MNTV_CHANNELS[currentChannel];
+      if (ch.type === 'youtube') return; // YouTube handles its own playback
+      
+      const mediaEl = document.getElementById(`${ch.type}-${currentChannel}`);
+      if (!mediaEl) return;
+
+      if (mediaEl.paused) {
+        mediaEl.play().catch(() => console.log('Play failed'));
+      } else {
+        mediaEl.pause();
+      }
+      updatePlayButton();
+    }
+
+    function updatePlayButton() {
+      const ch = MNTV_CHANNELS[currentChannel];
+      const mediaEl = document.getElementById(`${ch.type}-${currentChannel}`);
+      const btn = document.getElementById('playBtn');
+      
+      if (!mediaEl || ch.type === 'youtube') return;
+      
+      btn.innerHTML = mediaEl.paused
+        ? `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`
+        : `<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>`;
+    }
+
     function toggleMute() {
       const ch = MNTV_CHANNELS[currentChannel];
-      if (ch.type === 'youtube') return; // YouTube iframes handle their own mute
+      if (ch.type === 'youtube') return;
       
       const mediaEl = document.getElementById(`${ch.type}-${currentChannel}`);
       if (!mediaEl) return;
@@ -486,6 +531,21 @@
       btn.innerHTML = mediaEl.muted
         ? `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0.94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23zm-6.5 2.5l4 4h-4V6z"/></svg>`
         : `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23z"/></svg>`;
+    }
+
+    function toggleFullscreen() {
+      const player = document.getElementById('tvPlayer');
+      isFullscreen = !isFullscreen;
+      
+      if (isFullscreen) {
+        player.classList.add('fullscreen');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('fullscreenBtn').innerHTML = `<svg viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>`;
+      } else {
+        player.classList.remove('fullscreen');
+        document.body.style.overflow = 'auto';
+        document.getElementById('fullscreenBtn').innerHTML = `<svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>`;
+      }
     }
 
     function switchChannel(channelKey) {
@@ -576,6 +636,8 @@
         img.src = item.file;
         img.style.display = 'block';
       }
+
+      updatePlayButton();
     }
 
     function setupEndedListeners(mediaEl, channelKey) {
@@ -645,6 +707,13 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       switchChannel('news');
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+      if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+      if (e.key === 'm' || e.key === 'M') toggleMute();
     });
     
     function updateClock() {
