@@ -116,7 +116,7 @@
       overflow: hidden;
     }
 
-.channel-video,.channel-audio,.channel-image,.channel-iframe {
+.channel-video,.channel-audio,.channel-image {
       position: absolute;
       top: 0;
       left: 0;
@@ -125,7 +125,6 @@
       object-fit: contain;
       background: #000;
       display: none;
-      border: none;
     }
 .live-badge {
       position: absolute;
@@ -337,11 +336,6 @@
         <video id="video-kids" class="channel-video"></video>
         <video id="video-government" class="channel-video"></video>
         <audio id="audio-radio" class="channel-audio"></audio>
-        <iframe id="iframe-news" class="channel-iframe"></iframe>
-        <iframe id="iframe-sports" class="channel-iframe"></iframe>
-        <iframe id="iframe-music" class="channel-iframe"></iframe>
-        <iframe id="iframe-kids" class="channel-iframe"></iframe>
-        <iframe id="iframe-government" class="channel-iframe"></iframe>
         <div id="radio-ui-radio" class="radio-ui">
           <div class="radio-logo">📻</div>
           <div id="radio-title" style="color:var(--mntv-gold);font-weight:bold;"></div>
@@ -358,7 +352,7 @@
 
       <div class="player-controls">
         <button class="mute-btn" id="muteBtn" onclick="toggleMute()">
-          <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23zm-6.5 2.5l4 4h-4V6z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
         </button>
       </div>
 
@@ -396,12 +390,12 @@
       },
       music: {
         name: 'Music Channel',
-        type: 'youtube',
-        isLive: false,
-        file: 'dQw4w9WgXcQ',
+        type: 'video' ,
+        isLive: false ,
+        file: '' ,
         items: [
-          { title: 'Music Video 1', type: 'youtube', file: 'dQw4w9WgXcQ', isLive: false, thumb: null },
-          { title: 'Music Video 2', type: 'youtube', file: 'jNQXAC9IVRw', isLive: false, thumb: null }
+          { title: 'Malunggay Pandesal', type: 'video', file: 'malunggay_pandesal.mp3', isLive: false, thumb: 'malunggay_pandesal.png' },
+          { title: 'La Mentira', type: 'video', file: 'la_mentira.mp4', isLive: false, thumb: 'music_thumb1.jpg' }
         ]
       },
       kids: {
@@ -410,27 +404,27 @@
         isLive: true,
         file: 't0Q2otsqC4I',
         items: [
-          { title: 'TEST BROADCAST', type: 'youtube', file: 'M7lc1UVf-VE', isLive: true, thumb: null },
-          { title: 'Cartoon Video', type: 'youtube', file: '_GE6zf_hH48', isLive: true, thumb: null }
+          { title: 'TEST BROADCAST', type: 'youtube', file: 'M7lc1UVf-VE', isLive: true, thumb: null } ,
+          { title: 'Tom and Jerry', type: 'youtube', file: '_GE6zf_hH48', isLive: true, thumb: null }
         ]
+        
       },
       radio: {
         name: 'Radio Maharlika',
         type: 'audio',
         isLive: false,
-        file: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+        file: 'radio_news.mp3',
         isRadio: true,
         items: [
-          { title: 'Test Broadcast', type: 'audio', file: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', isLive: false, thumb: null }
-        ]
-      },
-      government: {
+          { title: 'Test Broadcast', type: 'audio' , file: 'ocean_deep.mp3', isLive: false, thumb: null }
+        ]},
+        government: {
         name: 'SRM State Channel',
-        type: 'youtube',
-        isLive: false,
-        file: 'dQw4w9WgXcQ',
+        type: 'video' ,
+        isLive: false ,
+        file: '' ,
         items: [
-          { title: 'Government Broadcast', type: 'youtube', file: 'dQw4w9WgXcQ', isLive: false, thumb: null }
+          { title: 'No Broadcast', type: null, file: null , isLive: false, thumb: null }
         ]
       }
     };
@@ -443,8 +437,9 @@
     });
 
     function hideAllMedia() {
-      document.querySelectorAll('.channel-video,.channel-audio,.channel-image,.radio-ui,.channel-iframe').forEach(el => {
+      document.querySelectorAll('.channel-video,.channel-audio,.channel-image,.radio-ui').forEach(el => {
         if (el.tagName === 'VIDEO' || el.tagName === 'AUDIO') {
+          el.pause();
           el.muted = true;
         }
         el.style.display = 'none';
@@ -453,16 +448,14 @@
 
     function toggleMute() {
       const ch = MNTV_CHANNELS[currentChannel];
-      if (ch.type === 'youtube') return; // YouTube iframes handle their own mute
-      
       const mediaEl = document.getElementById(`${ch.type}-${currentChannel}`);
       if (!mediaEl) return;
 
-      mediaEl.muted = !mediaEl.muted;
+      mediaEl.muted =!mediaEl.muted;
       const btn = document.getElementById('muteBtn');
       btn.innerHTML = mediaEl.muted
-        ? `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0.94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23zm-6.5 2.5l4 4h-4V6z"/></svg>`
-        : `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23z"/></svg>`;
+? `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0.94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>`
+        : `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`;
     }
 
     function switchChannel(channelKey) {
@@ -512,7 +505,7 @@
 
       if (item.type === 'video') {
         const video = document.getElementById(`video-${channelKey}`);
-        if (!video.src || !video.src.includes(item.file)) {
+        if (video.src !== item.file) {
           video.src = item.file;
           video.load();
           setupEndedListeners(video, channelKey);
@@ -524,14 +517,9 @@
           video.play().catch(e => console.log('Autoplay failed'));
         });
       }
-      else if (item.type === 'youtube') {
-        const iframe = document.getElementById(`iframe-${channelKey}`);
-        iframe.src = `https://www.youtube.com/embed/${item.file}?autoplay=1&controls=0&modestbranding=1`;
-        iframe.style.display = 'block';
-      }
       else if (item.type === 'audio') {
         const audio = document.getElementById(`audio-${channelKey}`);
-        if (!audio.src || !audio.src.includes(item.file)) {
+        if (audio.src !== item.file) {
           audio.src = item.file;
           audio.load();
           setupEndedListeners(audio, channelKey);
@@ -556,38 +544,37 @@
     }
 
     function setupEndedListeners(mediaEl, channelKey) {
-      mediaEl.onended = null;
-      mediaEl.onended = () => {
-        const ch = MNTV_CHANNELS[channelKey];
-        currentItemIndex[channelKey]++;
+  mediaEl.onended = null;
+  mediaEl.onended = () => {
+    const ch = MNTV_CHANNELS[channelKey];
+    currentItemIndex[channelKey]++;
 
-        if (currentItemIndex[channelKey] >= ch.items.length) {
-          currentItemIndex[channelKey] = 0;
-        }
-
-        if (currentChannel === channelKey) {
-          const nextItem = ch.items[currentItemIndex[channelKey]];
-          playMedia(channelKey, nextItem);
-          renderPlaylist();
-        }
-      };
+    if (currentItemIndex[channelKey] >= ch.items.length) {
+      currentItemIndex[channelKey] = 0;
     }
 
-    function nextItem(channelKey) {
-      if (currentChannel !== channelKey) return;
-
-      const ch = MNTV_CHANNELS[channelKey];
-      currentItemIndex[channelKey]++;
-
-      if (currentItemIndex[channelKey] >= ch.items.length) {
-        currentItemIndex[channelKey] = 0;
-      }
-
+    if (currentChannel === channelKey) {
       const nextItem = ch.items[currentItemIndex[channelKey]];
       playMedia(channelKey, nextItem);
       renderPlaylist();
     }
+  };
+}
 
+function nextItem(channelKey) {
+  if (currentChannel !== channelKey) return;
+
+  const ch = MNTV_CHANNELS[channelKey];
+  currentItemIndex[channelKey]++;
+
+  if (currentItemIndex[channelKey] >= ch.items.length) {
+    currentItemIndex[channelKey] = 0;
+  }
+
+  const nextItem = ch.items[currentItemIndex[channelKey]];
+  playMedia(channelKey, nextItem);
+  renderPlaylist();
+}
     function renderPlaylist() {
       const ch = MNTV_CHANNELS[currentChannel];
       const currentIdx = currentItemIndex[currentChannel];
@@ -597,20 +584,18 @@
         let icon = '🎬';
         if (item.type === 'audio') icon = '🎵';
         if (item.type === 'image') icon = '🖼️';
-        if (item.type === 'youtube') icon = '▶️';
         if (!item.file) icon = '📡';
 
         let badge = '';
         if (item.isLive) badge = '<div class="item-badge live">LIVE</div>';
         else if (item.type === 'audio') badge = '<div class="item-badge audio">AUDIO</div>';
         else if (item.type === 'image') badge = '<div class="item-badge img">IMG</div>';
-        else if (item.type === 'youtube') badge = '<div class="item-badge vod">YOUTUBE</div>';
         else if (item.file) badge = '<div class="item-badge vod">VOD</div>';
 
         html += `
-          <div class="playlist-item ${i === currentIdx ? 'active' : ''}">
+          <div class="playlist-item ${i === currentIdx? 'active' : ''}">
             <div class="thumb">
-              ${item.thumb ? `<img src="${item.thumb}" onerror="this.style.display='none'">` : icon}
+              ${item.thumb? `<img src="${item.thumb}" onerror="this.style.display='none'">` : icon}
               ${badge}
             </div>
             <div class="playlist-title">${item.title || 'No Signal'}</div>
@@ -624,13 +609,13 @@
       switchChannel('news');
     });
     
-    function updateClock() {
-      const now = new Date();
-      const options = { timeZone: 'Asia/Manila', hour12: true };
-      document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-PH', options) + ' PHT';
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+  function updateClock() {
+  const now = new Date();
+  const options = { timeZone: 'Asia/Manila', hour12: true };
+  document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-PH', options) + ' PHT';
+}
+setInterval(updateClock, 1000);
+updateClock();
 
   </script>
 </body>
