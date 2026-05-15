@@ -500,53 +500,36 @@
         ]
       }
     };
+
+        
+    
 let currentChannel = 'news';
 let currentItemIndex = {};
 let isFullscreen = false;
-let players = {};
-let youtubeAPIReady = false;
-
-// Load YouTube IFrame API
-let tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-document.body.appendChild(tag);
-
-// YouTube API callback - fires when API is ready
-function onYouTubeIframeAPIReady() {
-  youtubeAPIReady = true;
-  // Reload current channel if it was YouTube
-  const ch = MNTV_CHANNELS[currentChannel];
-  const item = ch.items[currentItemIndex[currentChannel]];
-  if (item && item.type === 'youtube') {
-    playMedia(currentChannel, item);
-  }
-}
-
-Object.keys(MNTV_CHANNELS).forEach(ch => {
-  currentItemIndex[ch] = 0;
-});
 
 function hideAllMedia() {
+  // Stop and hide all videos
   document.querySelectorAll('.channel-video').forEach(el => {
     el.pause();
     el.currentTime = 0;
     el.style.display = 'none';
   });
-
+  // Stop and hide all audio
   document.querySelectorAll('.channel-audio').forEach(el => {
     el.pause();
     el.currentTime = 0;
     el.style.display = 'none';
   });
-
+  // Clear all iframes
   document.querySelectorAll('.channel-iframe').forEach(el => {
+    el.src = '';
     el.style.display = 'none';
   });
-
+  // Hide radio UI
   document.querySelectorAll('.radio-ui').forEach(el => {
     el.style.display = 'none';
   });
-
+  // Hide images
   document.querySelectorAll('.channel-image').forEach(el => {
     el.style.display = 'none';
   });
@@ -554,22 +537,9 @@ function hideAllMedia() {
 
 function togglePlay() {
   const ch = MNTV_CHANNELS[currentChannel];
-  const item = ch.items[currentItemIndex[currentChannel]];
-
-  if (item.type === 'youtube' && players[currentChannel]) {
-    const state = players[currentChannel].getPlayerState();
-    if (state === YT.PlayerState.PLAYING) {
-      players[currentChannel].pauseVideo();
-    } else {
-      players[currentChannel].playVideo();
-    }
-    updatePlayButton();
-    return;
-  }
-
-  const mediaEl = document.getElementById(`${item.type}-${currentChannel}`);
+  if (ch.type === 'youtube') return; // YouTube handles its own playback
+  const mediaEl = document.getElementById(`${ch.type}-${currentChannel}`);
   if (!mediaEl) return;
-
   if (mediaEl.paused) {
     mediaEl.play().catch(() => console.log('Play failed'));
   } else {
@@ -580,49 +550,20 @@ function togglePlay() {
 
 function updatePlayButton() {
   const ch = MNTV_CHANNELS[currentChannel];
-  const item = ch.items[currentItemIndex[currentChannel]];
+  const mediaEl = document.getElementById(`${ch.type}-${currentChannel}`);
   const btn = document.getElementById('playBtn');
-  if (!btn) return;
-
-  if (item.type === 'youtube' && players[currentChannel]) {
-    const state = players[currentChannel].getPlayerState();
-    btn.innerHTML = state === YT.PlayerState.PLAYING
-     ? `<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>`
-      : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
-    return;
-  }
-
-  const mediaEl = document.getElementById(`${item.type}-${currentChannel}`);
-  if (!mediaEl) return;
-  btn.innerHTML = mediaEl.paused
-   ? `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`
-    : `<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>`;
+  if (!mediaEl || ch.type === 'youtube') return;
+  btn.innerHTML = mediaEl.paused? `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>` : `<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>`;
 }
 
 function toggleMute() {
   const ch = MNTV_CHANNELS[currentChannel];
-  const item = ch.items[currentItemIndex[currentChannel]];
-
-  if (item.type === 'youtube' && players[currentChannel]) {
-    if (players[currentChannel].isMuted()) {
-      players[currentChannel].unMute();
-    } else {
-      players[currentChannel].mute();
-    }
-    const btn = document.getElementById('muteBtn');
-    btn.innerHTML = players[currentChannel].isMuted()
-     ? `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0.94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23zm-6.5 2.5l4 4h-4V6z"/></svg>`
-      : `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23z"/></svg>`;
-    return;
-  }
-
-  const mediaEl = document.getElementById(`${item.type}-${currentChannel}`);
+  if (ch.type === 'youtube') return;
+  const mediaEl = document.getElementById(`${ch.type}-${currentChannel}`);
   if (!mediaEl) return;
   mediaEl.muted =!mediaEl.muted;
   const btn = document.getElementById('muteBtn');
-  btn.innerHTML = mediaEl.muted
-   ? `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0.94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23zm-6.5 2.5l4 4h-4V6z"/></svg>`
-    : `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23z"/></svg>`;
+  btn.innerHTML = mediaEl.muted? `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0.94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23zm-6.5 2.5l4 4h-4V6z"/></svg>` : `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.82 7-9.31 0-4.49-3.01-8.27-7-9.18V3.23z"/></svg>`;
 }
 
 function toggleFullscreen() {
@@ -630,7 +571,6 @@ function toggleFullscreen() {
   const overlay = document.getElementById('fullscreenOverlay');
   const exitBtn = document.getElementById('fullscreenExitBtn');
   isFullscreen =!isFullscreen;
-
   if (isFullscreen) {
     player.classList.add('fullscreen');
     overlay.classList.add('active');
@@ -650,11 +590,9 @@ function switchChannel(channelKey) {
   hideAllMedia();
   currentChannel = channelKey;
   const ch = MNTV_CHANNELS[channelKey];
-
   document.querySelectorAll('.ch-btn').forEach((btn, i) => {
     btn.classList.toggle('active', Object.keys(MNTV_CHANNELS)[i] === channelKey);
   });
-
   document.getElementById('channelBadge').textContent = ch.name;
   const item = ch.items[currentItemIndex[channelKey]];
   playMedia(channelKey, item);
@@ -665,10 +603,8 @@ function playMedia(channelKey, item) {
   const ch = MNTV_CHANNELS[channelKey];
   const screen = document.getElementById('channelContent');
   screen.innerHTML = '';
-
   document.getElementById('videoTitle').textContent = item.title || 'No Signal';
   document.getElementById('videoMeta').textContent = ch.name;
-
   const badgeEl = document.getElementById('statusBadge');
   if (item.isLive) {
     badgeEl.className = 'live-badge';
@@ -679,7 +615,6 @@ function playMedia(channelKey, item) {
   } else {
     badgeEl.innerHTML = '';
   }
-
   if (!item.file || item.type === null) {
     screen.innerHTML = `
       <div class="no-signal">
@@ -689,127 +624,110 @@ function playMedia(channelKey, item) {
     `;
     return;
   }
-
   if (item.type === 'video') {
-    screen.innerHTML = `<video id="video-${channelKey}" class="channel-video" style="width:100%;height:100%;display:block;"></video>`;
     const video = document.getElementById(`video-${channelKey}`);
-    video.src = item.file;
+    if (!video.src ||!video.src.includes(item.file)) {
+      video.src = item.file;
+      video.load();
+      setupEndedListeners(video, channelKey);
+    }
     video.muted = false;
-    video.playsinline = true;
-    setupEndedListeners(video, channelKey);
-    video.play().catch(() => {
+    video.style.display = 'block';
+    if (video.paused) video.play().catch(() => {
       video.muted = true;
       video.play().catch(e => console.log('Autoplay failed'));
     });
-
-  } else if (item.type === 'youtube') {
-    if (!youtubeAPIReady) {
-      screen.innerHTML = `<div class="no-signal"><div>Loading YouTube...</div></div>`;
-      return;
-    }
-
-    screen.innerHTML = `<div id="yt-${channelKey}" class="channel-iframe" style="width:100%;height:100%;"></div>`;
-
-    if (players[channelKey]) {
-      players[channelKey].destroy();
-    }
-
-    players[channelKey] = new YT.Player(`yt-${channelKey}`, {
-      videoId: item.file,
+  } else if (ch.type === 'youtube') {
+    wrapper.innerHTML = `<div id="yt-${chKey}" style="width:100%;height:100%;"></div>`;
+    players[chKey] = new YT.Player(`yt-${chKey}`, {
+      videoId: ch.file,
       playerVars: {
         autoplay: 1,
         mute: 1,
         controls: 0,
         modestbranding: 1,
         rel: 0,
-        playsinline: 1,
-        origin: location.origin
+        playsinline: 1
       },
       events: {
-        'onReady': (e) => {
-          e.target.playVideo();
-          setOnAir();
-        },
+        'onReady': () => setOnAir(),
         'onStateChange': (e) => {
           if (e.data === YT.PlayerState.ENDED) {
-            nextItem(channelKey);
+            nextTrack(chKey); // play next item in playlist array
           }
-        },
-        'onError': (e) => {
-          console.log('YouTube error:', e.data);
-          nextItem(channelKey);
         }
       }
     });
-
   } else if (item.type === 'audio') {
-    screen.innerHTML = `<audio id="audio-${channelKey}" class="channel-audio"></audio>`;
     const audio = document.getElementById(`audio-${channelKey}`);
-    audio.src = item.file;
-    audio.muted = false;
-    setupEndedListeners(audio, channelKey);
-
-    if (ch.isRadio) {
-      screen.innerHTML += `<div id="radio-ui-${channelKey}" class="radio-ui" style="display:flex;"><div id="radio-title">${item.title}</div></div>`;
+    if (!audio.src ||!audio.src.includes(item.file)) {
+      audio.src = item.file;
+      audio.load();
+      setupEndedListeners(audio, channelKey);
     }
-
-    audio.play().catch(() => {
+    audio.muted = false;
+    if (ch.isRadio) {
+      document.getElementById(`radio-ui-${channelKey}`).style.display = 'flex';
+      document.getElementById('radio-title').textContent = item.title;
+    }
+    if (audio.paused) audio.play().catch(() => {
       audio.muted = true;
       audio.play().catch(e => console.log('Autoplay failed'));
     });
-
   } else if (item.type === 'image') {
-    screen.innerHTML = `<img id="image-${channelKey}" class="channel-image" src="${item.file}" style="width:100%;height:100%;object-fit:contain;display:block;">`;
+    const img = document.getElementById(`image-${channelKey}`);
+    img.src = item.file;
+    img.style.display = 'block';
   }
-
   updatePlayButton();
 }
 
 function setupEndedListeners(mediaEl, channelKey) {
   mediaEl.onended = null;
   mediaEl.onended = () => {
-    nextItem(channelKey);
+    const ch = MNTV_CHANNELS[channelKey];
+    currentItemIndex[channelKey]++;
+    if (currentItemIndex[channelKey] >= ch.items.length) {
+      currentItemIndex[channelKey] = 0;
+    }
+    if (currentChannel === channelKey) {
+      const nextItem = ch.items[currentItemIndex[channelKey]];
+      playMedia(channelKey, nextItem);
+      renderPlaylist();
+    }
   };
 }
 
 function nextItem(channelKey) {
+  if (currentChannel!== channelKey) return;
   const ch = MNTV_CHANNELS[channelKey];
-  if (!ch) return;
-
   currentItemIndex[channelKey]++;
   if (currentItemIndex[channelKey] >= ch.items.length) {
     currentItemIndex[channelKey] = 0;
   }
-
   const nextItem = ch.items[currentItemIndex[channelKey]];
-
-  if (currentChannel === channelKey) {
-    playMedia(channelKey, nextItem);
-    renderPlaylist();
-  }
+  playMedia(channelKey, nextItem);
+  renderPlaylist();
 }
 
 function renderPlaylist() {
   const ch = MNTV_CHANNELS[currentChannel];
   const currentIdx = currentItemIndex[currentChannel];
   let html = '';
-
   ch.items.forEach((item, i) => {
     let icon = '🎬';
     if (item.type === 'audio') icon = '🎵';
     if (item.type === 'image') icon = '🖼️';
     if (item.type === 'youtube') icon = '▶️';
     if (!item.file) icon = '📡';
-
     let badge = '';
     if (item.isLive) badge = '<div class="item-badge live">LIVE</div>';
     else if (item.type === 'audio') badge = '<div class="item-badge audio">AUDIO</div>';
     else if (item.type === 'image') badge = '<div class="item-badge img">IMG</div>';
     else if (item.type === 'youtube') badge = '<div class="item-badge vod">YOUTUBE</div>';
     else if (item.file) badge = '<div class="item-badge vod">VOD</div>';
-
     html += `
-      <div class="playlist-item ${i === currentIdx? 'active' : ''}" onclick="jumpToItem(${i})">
+      <div class="playlist-item ${i === currentIdx? 'active' : ''}">
         <div class="thumb">
           ${item.thumb? `<img src="${item.thumb}" onerror="this.style.display='none'">` : icon}
           ${badge}
@@ -818,21 +736,14 @@ function renderPlaylist() {
       </div>
     `;
   });
-
   document.getElementById('playlist').innerHTML = html;
-}
-
-function jumpToItem(index) {
-  currentItemIndex[currentChannel] = index;
-  const item = MNTV_CHANNELS[currentChannel].items[index];
-  playMedia(currentChannel, item);
-  renderPlaylist();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
   switchChannel('news');
 });
 
+// Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
   if (e.key === 'f' || e.key === 'F') toggleFullscreen();
   if (e.key === ' ') {
@@ -852,10 +763,6 @@ function updateClock() {
 }
 setInterval(updateClock, 1000);
 updateClock();
-
-function setOnAir() {
-  // Your on-air indicator logic here
-    }
     
 
 
