@@ -63,38 +63,6 @@ body {
   border-radius: 4px;
 }
 
-/* TICKER */
-
-.ticker {
-  background: gold;
-  color: black;
-
-  padding: 6px;
-
-  overflow: hidden;
-  white-space: nowrap;
-
-  font-size: 11px;
-  font-weight: bold;
-}
-
-.ticker span {
-  display: inline-block;
-  padding-left: 100%;
-
-  animation: scroll 20s linear infinite;
-}
-
-@keyframes scroll {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
 /* CHANNEL BAR */
 
 .channel-bar {
@@ -680,38 +648,51 @@ body {
 
 /* FULLSCREEN */
 
-.tv-player:fullscreen {
-  width: 100vw;
-  height: 100vh;
-
-  max-width: 100vw;
-
-  aspect-ratio: unset;
-
-  border: none;
-
-  border-radius: 0;
+/* NORMAL PLAYER */
+.video-player {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    overflow: hidden;
+    border: 4px solid #d4af37;
+    border-radius: 20px;
 }
 
-.tv-player:-webkit-full-screen {
-  width: 100vw;
-  height: 100vh;
-
-  border: none;
+/* YOUTUBE IFRAME */
+.video-player iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
 }
 
-.tv-player:-moz-full-screen {
-  width: 100vw;
-  height: 100vh;
-
-  border: none;
+/* FULLSCREEN MODE */
+.video-player:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    aspect-ratio: auto;
+    border-radius: 0;
+    border: none;
+    background: #000;
 }
 
-.tv-player:-ms-fullscreen {
-  width: 100vw;
-  height: 100vh;
+.video-player:fullscreen iframe {
+    width: 100vw;
+    height: 100vh;
+}
 
-  border: none;
+/* MOBILE SUPPORT */
+.video-player:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
+}
+
+.video-player:-webkit-full-screen iframe {
+    width: 100vw;
+    height: 100vh;
 }
 
 /* MOBILE FIX */
@@ -801,6 +782,12 @@ video::-webkit-media-controls-fullscreen-button {
       <div class="tv-player" id="tvPlayer">
         <div class="channel-badge" id="channelBadge">MNTV NEWS</div>
         <div id="statusBadge"></div>
+        
+        <iframe id="youtubePlayer"
+    src="https://www.youtube.com/embed/VIDEO_ID?autoplay=1&mute=1&rel=0"
+    allow="autoplay; fullscreen"
+    allowfullscreen>
+        </iframe>
 
         <video id="video-news" class="channel-video"></video>
         <video id="video-sports" class="channel-video"></video>
@@ -1025,33 +1012,13 @@ function toggleMute() {
 }
 
 function toggleFullscreen() {
-  const player = document.getElementById('tvPlayer');
+    const player = document.querySelector('.video-player');
 
-  if (!document.fullscreenElement) {
-
-    if (player.requestFullscreen) {
-      player.requestFullscreen();
+    if (!document.fullscreenElement) {
+        player.requestFullscreen();
+    } else {
+        document.exitFullscreen();
     }
-    else if (player.webkitRequestFullscreen) {
-      player.webkitRequestFullscreen();
-    }
-    else if (player.msRequestFullscreen) {
-      player.msRequestFullscreen();
-    }
-
-  } else {
-
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-    else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
-    else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-    }
-
-  }
 }
 
 function playMedia(channelKey, item) {
