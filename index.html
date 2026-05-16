@@ -5,387 +5,648 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Maharlika National Television - MNTV</title>
   <style>
-  :root {
-  --mntv-blue: #0B3D80; 
-  --mntv-red: #E10600; 
-  --mntv-gold: #FFD700;   /* Gold - accents, borders, highlights */
-  --mntv-white: #FFFFFF;  /* White - main text */
-  --mntv-gray: #272727;   /* Dark gray - panels, controls, inactive items */
-  --mntv-dark: #0F0F0F;   /* Near-black - main background */
-}
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      background: #272727;
-      color: white;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      min-height: 100vh;
-    }
-
-    body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 50% 0%, rgba(10, 168, 224, 0.2) 0%, transparent 70%);
-    animation: bgPulse 10s ease-in-out infinite;
-    pointer-events: none;
-    z-index: -1;
+      :root {
+  --mntv-blue: #0B3D80;
+  --mntv-red: #E10600;
+  --mntv-gold: #FFD700;
+  --mntv-white: #FFFFFF;
+  --mntv-gray: #272727;
+  --mntv-dark: #0F0F0F;
 }
 
-@keyframes bgPulse {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-    
-    .tv-header {
-      background: #0B3D80;
-      border-bottom: 2px #0B3D80;
-      padding: 5px 4px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .logo-text h1 {
-      font-size: 10px; /* was 5px, too small */
-      color: var(--maharlikan-gold);
-      line-height: 1;
-    }
-    
-    .logo-text p {
-      font-size: 5px;
-      opacity: 0.9;
-      color: var(--maharlikan-white);
-    }
-    
-    #liveClock {
-      font-family: monospace;
-      font-size: 9px;
-      background: #272727;
-      color: var(--maharlikan-white);
-      padding: 4px 8px;
-      border-radius: 3px;
-    }
+
+body {
+  background: #5C0011;
+  color: white;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* HEADER */
+
+.tv-header {
+  background: #0B3D80;
+  border-bottom: 2px solid var(--mntv-gold);
+  padding: 8px 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-text h1 {
+  font-size: 14px;
+  color: var(--mntv-gold);
+  line-height: 1.2;
+}
+
+.logo-text p {
+  font-size: 8px;
+  opacity: 0.9;
+  color: white;
+}
+
+#liveClock {
+  font-family: monospace;
+  font-size: 11px;
+
+  background: #272727;
+
+  padding: 5px 10px;
+
+  border-radius: 4px;
+}
+
+/* TICKER */
+
+.ticker {
+  background: gold;
+  color: black;
+
+  padding: 6px;
+
+  overflow: hidden;
+  white-space: nowrap;
+
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.ticker span {
+  display: inline-block;
+  padding-left: 100%;
+
+  animation: scroll 20s linear infinite;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* CHANNEL BAR */
 
 .channel-bar {
-      background: #000;
-      border-bottom: 2px solid var(--mntv-gold);
-      padding: 10px;
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-    }
+  background: #000;
+
+  border-bottom: 2px solid var(--mntv-gold);
+
+  padding: 10px;
+
+  display: flex;
+  gap: 10px;
+
+  overflow-x: auto;
+}
+
+.channel-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.channel-bar::-webkit-scrollbar-thumb {
+  background: var(--mntv-gold);
+}
+
+/* CHANNEL BUTTONS */
+
 .ch-btn {
-      background: red;
-      color: white;
-      border: 1px solid var(--mntv-gold);
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      white-space: nowrap;
-      font-weight: 600;
-    }
-.ch-btn.active { background: green; }
+  background: #8B0000;
+
+  color: white;
+
+  border: 1px solid var(--mntv-gold);
+
+  padding: 8px 16px;
+
+  border-radius: 20px;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  font-weight: 600;
+
+  transition: 0.2s ease;
+}
+
+.ch-btn:hover {
+  background: var(--mntv-blue);
+}
+
+.ch-btn.active {
+  background: green;
+}
+
+/* MAIN LAYOUT */
 
 .watch-container {
-      display: flex;
-      gap: 20px;
-      padding: 20px;
-      max-width: 1400px;
-      margin: auto;
-    }
-.player-section { flex: 1; min-width: 0; }
-.playlist-section { width: 350px; }
+  display: flex;
+  gap: 20px;
+
+  padding: 20px;
+
+  max-width: 1400px;
+
+  margin: auto;
+}
+
+.player-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.playlist-section {
+  width: 350px;
+}
+
+/* TV PLAYER */
 
 .tv-player {
-  background: #000;
-  aspect-ratio: 16/9;
-  border: 3px solid var(--mntv-gold);
   position: relative;
+
+  width: 100%;
+
+  aspect-ratio: 16 / 9;
+
+  background: #000;
+
   overflow: hidden;
+
+  border: 3px solid var(--mntv-gold);
+
+  border-radius: 10px;
 }
 
 /* ALL MEDIA */
+
 .channel-video,
 .channel-audio,
 .channel-image,
+.radio-ui,
 #channelContent,
 #channelContent iframe {
   position: absolute;
+
   inset: 0;
+
   width: 100%;
   height: 100%;
 }
 
 /* VIDEO */
+
 .channel-video {
-  object-fit: cover;
   display: none;
+
+  object-fit: cover;
+
   background: #000;
+
+  z-index: 1;
+}
+
+/* AUDIO */
+
+.channel-audio {
+  display: none;
 }
 
 /* IMAGE */
+
 .channel-image {
-  object-fit: contain;
   display: none;
+
+  object-fit: contain;
+
   background: #000;
+
+  z-index: 1;
 }
 
 /* YOUTUBE */
+
+#channelContent {
+  z-index: 1;
+}
+
 #channelContent iframe {
   border: none;
+
+  width: 100%;
+  height: 100%;
+
   display: block;
 }
 
 /* RADIO */
+
 .radio-ui {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+  display: none;
+
+  z-index: 3;
+
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  gap: 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #1a1a1a,
+      #000
+    );
 }
 
-.fullscreen-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.3);
-      display: none;
-      z-index: 9998;
-      backdrop-filter: blur(2px);
-    }
+.radio-logo {
+  width: 120px;
+  height: 120px;
 
-.fullscreen-overlay.active {
-      display: block;
-    }
+  border-radius: 50%;
 
-.fullscreen-exit-btn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(11, 61, 128, 0.9);
-      color: white;
-      border: 2px solid var(--mntv-gold);
-      padding: 12px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 600;
-      display: none;
-      z-index: 10000;
-      transition: 0.2s;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    }
-ppp
-.fullscreen-exit-btn.active {
-      display: block;
-    }
+  background: var(--mntv-blue);
 
-.fullscreen-exit-btn:hover {
-      background: rgba(11, 61, 128, 1);
-      transform: scale(1.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 40px;
+
+  border: 3px solid var(--mntv-gold);
 }
 
-#channelContent {
-  width: 100%;
-  height: 0;
-  padding-bottom: 56.25%;
-  position: relative;
-  background: #000;
+/* WAVEFORM */
+
+.waveform {
+  display: flex;
+  gap: 3px;
+
+  align-items: center;
+
+  height: 40px;
 }
 
-#channelContent > div,
-#channelContent iframe,
-#channelContent video,
-#channelContent img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
+.waveform span {
+  width: 4px;
+
+  background: var(--mntv-gold);
+
+  animation: wave 1.2s infinite ease-in-out;
 }
-    
-.channel-video,.channel-audio,.channel-image,.channel-iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: #000;
-      display: none;
-      border: none;
-    }
-.live-badge {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #E10600;
-      color: white;
-      padding: 2px 8px;
-      border-radius: 3px;
-      font-weight: 700;
-      font-size: 9px;
-      animation: pulse 2s infinite;
-      z-index: 5;
-    }
+
+.waveform span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.waveform span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.waveform span:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.waveform span:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+@keyframes wave {
+  0%, 100% {
+    height: 10px;
+  }
+
+  50% {
+    height: 40px;
+  }
+}
+
+/* BADGES */
+
+.live-badge,
 .vod-badge {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #555;
-      color: white;
-      padding: 2px 8px;
-      border-radius: 3px;
-      font-weight: 700;
-      font-size: 9px;
-      z-index: 5;
-    }
-    @keyframes pulse {
-      0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; }
-    }
+  position: absolute;
+
+  top: 10px;
+  right: 10px;
+
+  z-index: 10;
+
+  color: white;
+
+  padding: 4px 10px;
+
+  border-radius: 4px;
+
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.live-badge {
+  background: #E10600;
+
+  animation: pulse 2s infinite;
+}
+
+.vod-badge {
+  background: #555;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* CHANNEL BADGE */
+
+.channel-badge {
+  position: absolute;
+
+  top: 10px;
+  left: 10px;
+
+  z-index: 10;
+
+  background: rgba(0,0,0,0.7);
+
+  padding: 5px 10px;
+
+  border-radius: 4px;
+
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* NO SIGNAL */
 
 .no-signal {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background:
-        repeating-linear-gradient(0deg, #222 0px, #222 1px, #333 1px, #333 2px),
-        repeating-linear-gradient(90deg, #222 0px, #222 1px, #333 1px, #333 2px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      color: #888;
-      font-weight: bold;
-      font-size: 24px;
-      text-shadow: 2px 2px 4px #000;
-    }
+  position: absolute;
 
-.radio-ui {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #1a1a1a, #000);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 20px;
-    }
-.radio-logo {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: var(--mntv-blue);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 40px;
-      border: 3px solid var(--mntv-gold);
-    }
-.waveform {
-      display: flex;
-      gap: 3px;
-      align-items: center;
-      height: 40px;
-    }
-.waveform span {
-      width: 4px;
-      background: var(--mntv-gold);
-      animation: wave 1.2s infinite ease-in-out;
-    }
-.waveform span:nth-child(2) { animation-delay: 0.1s; }
-.waveform span:nth-child(3) { animation-delay: 0.2s; }
-.waveform span:nth-child(4) { animation-delay: 0.3s; }
-.waveform span:nth-child(5) { animation-delay: 0.4s; }
-    @keyframes wave {
-      0%, 100% { height: 10px; }
-      50% { height: 40px; }
-    }
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  color: #888;
+
+  font-size: 24px;
+  font-weight: bold;
+
+  z-index: 5;
+
+  background:
+    repeating-linear-gradient(
+      0deg,
+      #222 0px,
+      #222 1px,
+      #333 1px,
+      #333 2px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #222 0px,
+      #222 1px,
+      #333 1px,
+      #333 2px
+    );
+}
+
+/* CONTROLS */
 
 .player-controls {
-      margin-top: 12px;
-      display: flex;
-      gap: 10px;
-    }
-.control-btn {
-      background: #272727;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 50%;
-      cursor: pointer;
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: 0.2s;
-    }
-.control-btn:hover { background: var(--mntv-blue); }
-.control-btn svg { width: 20px; height: 20px; fill: currentColor; }
+  margin-top: 12px;
 
-.video-info h2 { margin: 12px 0 5px; font-size: 20px; }
-.video-meta { color: #aaa; font-size: 14px; }
+  display: flex;
+  gap: 10px;
+}
+
+.mute-btn {
+  background: #272727;
+
+  color: white;
+
+  border: none;
+
+  width: 44px;
+  height: 44px;
+
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 0.2s;
+}
+
+.mute-btn:hover {
+  background: var(--mntv-blue);
+}
+
+/* VIDEO INFO */
+
+.video-info h2 {
+  margin: 12px 0 5px;
+
+  font-size: 20px;
+}
+
+.video-meta {
+  color: #aaa;
+
+  font-size: 14px;
+}
+
+/* PLAYLIST */
 
 .playlist-item {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
-      padding: 8px;
-      border-radius: 4px;
-      opacity: 0.7;
-      position: relative;
-      pointer-events: none;
-      cursor: default;
-    }
+  display: flex;
+  gap: 10px;
+
+  margin-bottom: 12px;
+
+  padding: 8px;
+
+  border-radius: 6px;
+
+  opacity: 0.7;
+
+  position: relative;
+
+  transition: 0.2s ease;
+}
+
 .playlist-item.active {
-      opacity: 1;
-      background: #272727;
-      border-left: 3px solid var(--mntv-blue);
-    }
+  opacity: 1;
+
+  background: #272727;
+
+  border-left: 3px solid var(--mntv-blue);
+}
+
+/* THUMB */
+
 .thumb {
-      width: 120px;
-      height: 68px;
-      background: #333;
-      flex-shrink: 0;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #666;
-      font-size: 24px;
-    }
-.thumb img { width: 100%; height: 100%; object-fit: cover; }
-.playlist-title { font-size: 14px; line-height: 1.3; }
+  width: 120px;
+  height: 68px;
+
+  background: #333;
+
+  flex-shrink: 0;
+
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #666;
+
+  font-size: 24px;
+
+  overflow: hidden;
+
+  border-radius: 4px;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* PLAYLIST TITLE */
+
+.playlist-title {
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+/* ITEM BADGES */
+
 .item-badge {
-      position: absolute;
-      top: 4px;
-      left: 4px;
-      font-size: 9px;
-      padding: 1px 4px;
-      border-radius: 2px;
-      font-weight: bold;
+  position: absolute;
+
+  top: 4px;
+  left: 4px;
+
+  font-size: 9px;
+
+  padding: 2px 5px;
+
+  border-radius: 3px;
+
+  font-weight: bold;
+}
+
+.item-badge.live {
+  background: #E10600;
+}
+
+.item-badge.vod {
+  background: #555;
+}
+
+.item-badge.audio {
+  background: #0B3D80;
+}
+
+.item-badge.img {
+  background: #8B0000;
+}
+
+/* FULLSCREEN */
+
+.tv-player:fullscreen {
+  width: 100vw;
+  height: 100vh;
+
+  aspect-ratio: unset;
+
+  border: none;
+
+  border-radius: 0;
+}
+
+.tv-player:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+}
+
+.tv-player:-moz-full-screen {
+  width: 100vw;
+  height: 100vh;
+}
+
+.tv-player:-ms-fullscreen {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* REMOVE DEFAULT CONTROLS */
+
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-timeline,
+video::-webkit-media-controls-current-time-display,
+video::-webkit-media-controls-time-remaining-display,
+video::-webkit-media-controls-seek-back-button,
+video::-webkit-media-controls-seek-forward-button,
+video::-webkit-media-controls-fullscreen-button {
+  display: none !important;
+}
+
+/* MOBILE */
+
+@media (max-width: 900px) {
+
+  .watch-container {
+    flex-direction: column;
+  }
+
+  .playlist-section {
+    width: 100%;
+  }
+
+  .tv-header {
+    flex-direction: column;
+    gap: 10px;
+
+    text-align: center;
+  }
+
+  .channel-badge {
+    font-size: 10px;
+  }
+
+  .video-info h2 {
+    font-size: 18px;
+  }
     }
-.item-badge.live { background: #E10600; }
-.item-badge.vod { background: #555; }
-.item-badge.audio { background: #0B3D80; }
-.item-badge.img { background: #8B0000; }
 
   </style>
 </head>
