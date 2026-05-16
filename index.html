@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maharlika National Television</title>
+<style>
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --accent: #0B3D80;
+  --accent-gold: #D4AF37;
+  --text: #fff;
+  --muted: rgba(255, 255, 255, 0.7);
+  --radius: 16px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--text);
+  background: #0a0e1a;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(11, 61, 128, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.25) 0%, transparent 50%);
+  animation: gradientShift 20s ease-in-out infinite;
+  z-index: -2;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(80px);
+  z-index: -1;
+}
+
+@keyframes gradientShift {
+ 0%, 100% { transform: scale(1) rotate(0deg); }
+ 50% { transform: scale(1.1) rotate(3deg); }
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+header {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px;
+  position: sticky;
+  top: 16px;
+  z-index: 10;
+}
+
+.logo h1 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.logo span {
+  font-size: 12px;
+  color: var(--accent-gold);
+}
+
+.live-time {
+  font-family: monospace;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+.container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.player-card {
+  padding: 20px;
+}
+
+.player-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.player-wrap iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.player-controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 10;
+}
+
+.player-wrap:hover.player-controls {
+  opacity: 1;
+}
+
+.ctrl-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  transition: 0.2s;
+}
+
+.ctrl-btn:hover {
+  background: var(--accent);
+}
+
+.channel-info {
+  margin-top: 16px;
+}
+
+.channel-info h2 {
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+
+.channel-info p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.channel-list {
+  padding: 20px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+.channel-list h3 {
+  font-size: 16px;
+  margin-bottom: 16px;
+  color: var(--accent-gold);
+}
+
+.channel-btn {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.channel-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateX(4px);
+}
+
+.channel-btn.active {
+  background: rgba(11, 61, 128, 0.4);
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(11, 61, 128, 0.3);
+}
+
+.channel-list::-webkit-scrollbar {
+  width: 6px;
+}
+.channel-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.player-wrap:fullscreen {
+  border-radius: 0;
+}
+</style>
+</head>
+<body>
+
+<header class="glass">
+  <div class="logo">
+    <h1>MAHARLIKA NATIONAL TV</h1>
+    <span>LIVE & ON DEMAND</span>
+  </div>
+  <div class="live-time" id="liveClock">--:--</div>
+</header>
+
+<div class="container">
+  <div class="player-card glass">
+    <div class="player-wrap" id="playerWrap">
+      <div class="player-controls">
+        <button class="ctrl-btn" id="enterFS">⛶ Fullscreen</button>
+        <button class="ctrl-btn" id="exitFS" style="display:none">✕ Exit</button>
+      </div>
+      <iframe id="player" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="channel-info">
+      <h2 id="channelTitle">Select a Channel</h2>
+      <p id="channelDesc">Choose from the list to start watching</p>
+    </div>
+  </div>
+
+  <aside class="channel-list glass">
+    <h3>Channels</h3>
+    <div id="channelButtons"></div>
+  </aside>
+</div>
+
+<script>
+// Clock
+function updateClock() {
+  document.getElementById('liveClock').textContent = new Date().toLocaleTimeString('en-PH');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Channels - replace with your YouTube IDs
+const channels = [
+  {
+    name: "Sports",
+    desc: "National and International Sports",
+    id: "dQw4w9WgXcQ",
+    type: "video"
+  },
+  {
+    name: "News Hour",
+    desc: "Breaking news and updates",
+    id: "Z5q281mZF2U",
+    type: "video"
+  },
+  {
+    name: "Documentary",
+    desc: "World Documentary",
+    id: "kJQP7kiw5Fk",
+    type: "video"
+  },
+    {
+    name: "Cartoons",
+    desc: "Kids",
+    id: "_GE6zf_hH48",
+    type: "video"
+  }
+];
+
+const player = document.getElementById('player');
+const playerWrap = document.getElementById('playerWrap');
+const channelButtons = document.getElementById('channelButtons');
+const channelTitle = document.getElementById('channelTitle');
+const channelDesc = document.getElementById('channelDesc');
+const enterFS = document.getElementById('enterFS');
+const exitFS = document.getElementById('exitFS');
+
+function loadChannel(index) {
+  const ch = channels[index];
+
+  // Minimal YouTube UI params
+  const params = 'autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1';
+
+  let url;
+  if (ch.type === "live") {
+    url = `https://www.youtube.com/embed/live_stream?channel=${ch.id}&${params}`;
+  } else {
+    url = `https://www.youtube.com/embed/${ch.id}?${params}`;
+  }
+
+  player.src = url;
+  channelTitle.textContent = ch.name;
+  channelDesc.textContent = ch.desc;
+
+  document.querySelectorAll('.channel-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === index);
+  });
+}
+
+// Fullscreen controls
+enterFS.onclick = () => {
+  if (playerWrap.requestFullscreen) playerWrap.requestFullscreen();
+};
+
+exitFS.onclick = () => {
+  if (document.exitFullscreen) document.exitFullscreen();
+};
+
+document.addEventListener('fullscreenchange', () => {
+  const isFS =!!document.fullscreenElement;
+  enterFS.style.display = isFS? 'none' : 'inline-block';
+  exitFS.style.display = isFS? 'inline-block' : 'none';
+});
+
+// Render channel buttons
+channels.forEach((ch, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'channel-btn';
+  btn.innerHTML = `<strong>${ch.name}</strong><br><small style="color:var(--muted)">${ch.desc}</small>`;
+  btn.onclick = () => loadChannel(i);
+  channelButtons.appendChild(btn);
+});
+
+// Load first channel
+if (channels.length > 0) loadChannel(0);
+</script>
+
+</body>
+</html>
