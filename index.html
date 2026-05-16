@@ -294,8 +294,8 @@ const channels = [
   {
     name: "Philippine Senate",
     desc: "Upper House of the Philippines",
-    id: "MNHB1W7kt64",
-    type: "video"
+    id: "PLykywO02JzUJqpG_d_5RU5-pCcmJf6tqa",
+    type: "playlist"
   },
   {
    name: "Philippine House of Representatives",
@@ -335,12 +335,18 @@ function loadChannel(index) {
   const ch = channels[index];
 
   // Minimal YouTube UI params
-  const params = 'autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1';
+  const params = 'autoplay=1&mute=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&loop=1';
 
   let url;
+
   if (ch.type === "live") {
     url = `https://www.youtube.com/embed/live_stream?channel=${ch.id}&${params}`;
-  } else {
+  }
+  else if (ch.type === "playlist") {
+    url = `https://www.youtube.com/embed/videoseries?list=${ch.id}&${params}`;
+  }
+  else {
+    // type === "video"
     url = `https://www.youtube.com/embed/${ch.id}?${params}`;
   }
 
@@ -351,7 +357,7 @@ function loadChannel(index) {
   document.querySelectorAll('.channel-btn').forEach((btn, i) => {
     btn.classList.toggle('active', i === index);
   });
-}
+  }
 
 // Fullscreen controls
 enterFS.onclick = () => {
